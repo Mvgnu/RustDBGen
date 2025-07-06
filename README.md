@@ -1,6 +1,8 @@
 # RustDBGen
 
-A powerful, enterprise-grade database schema-driven code generator for Rust backends. Generate complete, production-ready APIs from TOML schema definitions with zero boilerplate.
+An experimental schema-driven code generator for Rust backends. Generate complete, production-ready APIs from TOML schema definitions with zero boilerplate. 
+
+Current Status: Prototype.
 
 ## 🚀 Features
 
