@@ -1,0 +1,36 @@
+[models.Category]
+includes = ["audit_fields"]
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.name = { type = "String", db_type = "VARCHAR(100)", nullable = false, tags = ["display_name", "searchable"] }
+fields.type = { type = "TransactionType", db_type = "transaction_type", nullable = false }
+fields.color = { type = "String", db_type = "VARCHAR(7)", nullable = true, default = "'#000000'" }
+fields.icon = { type = "String", db_type = "VARCHAR(50)", nullable = true }
+fields.description = { type = "String", db_type = "TEXT", nullable = true }
+fields.is_default = { type = "Boolean", db_type = "BOOLEAN", default = "false" }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = true }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+relations.transactions = { on = "id", references = { model = "Transaction", field = "category_id" } }
+relations.budgets = { on = "id", references = { model = "Budget", field = "category_id" } }
+indexes.category_user_idx = { fields = ["user_id"] }
+indexes.category_type_idx = { fields = ["type"] }
+unique_constraints.category_name_user_unique = { fields = ["name", "user_id"] }
+check_constraints.category_name_length = { expression = "char_length(name) > 0" }
+check_constraints.category_color_format = { expression = "color ~ '^#[0-9A-Fa-f]{6}$' OR color IS NULL" }
+
+[models.Category.options]
+soft_delete = true
+
+[models.Category.permissions]
+read = ["admin", "member", "public"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.Category]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/categories"
+auth_required = true
+
+[routes.Category.permissions]
+read = ["admin", "member", "public"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 

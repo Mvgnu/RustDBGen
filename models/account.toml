@@ -1,0 +1,37 @@
+[models.Account]
+includes = ["audit_fields", "money_fields"]
+owned_by = "User"
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.name = { type = "String", db_type = "VARCHAR(100)", nullable = false, tags = ["display_name", "searchable"] }
+fields.type = { type = "AccountType", db_type = "account_type", nullable = false }
+fields.balance = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false, default = "0.00" }
+fields.description = { type = "String", db_type = "TEXT", nullable = true }
+fields.is_active = { type = "Boolean", db_type = "BOOLEAN", default = "true" }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = false }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+relations.transactions = { on = "id", references = { model = "Transaction", field = "account_id" } }
+relations.transfers_from = { on = "id", references = { model = "Transaction", field = "from_account_id" } }
+relations.transfers_to = { on = "id", references = { model = "Transaction", field = "to_account_id" } }
+indexes.account_user_idx = { fields = ["user_id"] }
+indexes.account_name_user_idx = { fields = ["name", "user_id"] }
+unique_constraints.account_name_user_unique = { fields = ["name", "user_id"] }
+check_constraints.account_balance_positive = { expression = "balance >= 0" }
+check_constraints.account_name_length = { expression = "char_length(name) > 0" }
+
+[models.Account.options]
+soft_delete = true
+
+[models.Account.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.Account]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/accounts"
+auth_required = true
+
+[routes.Account.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 

@@ -1,0 +1,35 @@
+[models.User]
+includes = ["audit_fields"]
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.email = { type = "String", db_type = "VARCHAR(255)", nullable = false, tags = ["searchable"], zod = "z.string().email()" }
+fields.first_name = { type = "String", db_type = "VARCHAR(100)", nullable = true, tags = ["searchable"] }
+fields.last_name = { type = "String", db_type = "VARCHAR(100)", nullable = true, tags = ["searchable"] }
+fields.role = { type = "Role", db_type = "role", default = "'member'" }
+fields.password_hash = { type = "String", db_type = "VARCHAR(255)", nullable = false, tags = ["password"] }
+fields.is_active = { type = "Boolean", db_type = "BOOLEAN", default = "true" }
+fields.profile_pic = { type = "File", storage = { backend = "s3", allowed_types = ["image/png", "image/jpeg"], path = "uploads/users/{id}/" } }
+relations.accounts = { on = "id", references = { model = "Account", field = "user_id" } }
+relations.transactions = { on = "id", references = { model = "Transaction", field = "user_id" } }
+relations.budgets = { on = "id", references = { model = "Budget", field = "user_id" } }
+relations.goals = { on = "id", references = { model = "Goal", field = "user_id" } }
+indexes.user_email_unique = { fields = ["email"], unique = true }
+check_constraints.user_email_not_empty = { expression = "email <> ''" }
+check_constraints.user_name_length = { expression = "char_length(first_name) > 0 OR first_name IS NULL" }
+
+[models.User.options]
+soft_delete = true
+
+[models.User.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin"]
+
+[routes.User]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/users"
+auth_required = true
+
+[routes.User.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin"]

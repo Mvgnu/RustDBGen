@@ -1,0 +1,105 @@
+schema_version = "1.0"
+
+include = [
+    "models/user.toml",
+    "models/account.toml", 
+    "models/category.toml",
+    "models/transaction.toml",
+    "models/budget.toml",
+    "models/goal.toml",
+    "models/recurring_transaction.toml"
+]
+
+[meta]
+rust_case_style = "camel"
+db_case_style = "snake"
+db_backend = "postgres"
+default_derives = ["Debug", "Clone", "serde::Serialize", "serde::Deserialize"]
+observability_provider = "tracing"
+
+[meta.auth]
+provider = "jwt"
+anonymous_role = "guest"
+role_claim = "role"
+public_role = "public"
+
+[enums.AccountType]
+variants = ["Checking", "Savings", "Credit", "Investment", "Loan", "Other"]
+
+[enums.TransactionType]
+variants = ["Income", "Expense", "Transfer", "Adjustment"]
+
+[enums.TransactionStatus]
+variants = ["Pending", "Completed", "Failed", "Cancelled"]
+
+[enums.BudgetPeriod]
+variants = ["Weekly", "Monthly", "Quarterly", "Yearly"]
+
+[enums.GoalStatus]
+variants = ["Active", "Completed", "Paused", "Cancelled"]
+
+[enums.RecurringFrequency]
+variants = ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+
+[enums.Role]
+variants = ["admin", "member", "guest"]
+
+[macros.audit_fields.fields.created_at]
+type = "DateTime<Utc>"
+db_type = "TIMESTAMPTZ"
+default = "now()"
+
+[macros.audit_fields.fields.updated_at]
+type = "DateTime<Utc>"
+db_type = "TIMESTAMPTZ"
+default = "now()"
+
+[macros.money_fields.fields.amount]
+type = "Decimal"
+db_type = "DECIMAL(15,2)"
+precision = 15
+scale = 2
+
+[macros.money_fields.fields.currency]
+type = "String"
+db_type = "VARCHAR(3)"
+default = "'USD'"
+max_length = 3
+
+[plugins.cat]
+command = "cat"
+
+[plugins.echo]
+command = "echo"
+args = ["hello"]
+
+[plugins.envtest]
+command = "sh"
+args = ["-c", "echo $FOO"]
+env.FOO = "bar"
+
+[plugins.pwdtest]
+command = "sh"
+args = ["-c", "pwd"]
+cwd = "tests"
+
+[seed.User]
+rows = [
+  { id = "00000000-0000-0000-0000-000000000001", email = "admin@finance.com", role = "admin" },
+  { id = "00000000-0000-0000-0000-000000000002", email = "user@finance.com", role = "member" }
+]
+
+[seed.Category]
+rows = [
+  { id = "00000000-0000-0000-0000-000000000101", name = "Food & Dining", type = "Expense", color = "#FF6B6B" },
+  { id = "00000000-0000-0000-0000-000000000102", name = "Transportation", type = "Expense", color = "#4ECDC4" },
+  { id = "00000000-0000-0000-0000-000000000103", name = "Entertainment", type = "Expense", color = "#45B7D1" },
+  { id = "00000000-0000-0000-0000-000000000104", name = "Salary", type = "Income", color = "#96CEB4" },
+  { id = "00000000-0000-0000-0000-000000000105", name = "Freelance", type = "Income", color = "#FFEAA7" }
+]
+
+[seed.Account]
+rows = [
+  { id = "00000000-0000-0000-0000-000000000201", name = "Main Checking", type = "Checking", balance = "5000.00", user_id = "00000000-0000-0000-0000-000000000002" },
+  { id = "00000000-0000-0000-0000-000000000202", name = "Savings Account", type = "Savings", balance = "15000.00", user_id = "00000000-0000-0000-0000-000000000002" }
+]

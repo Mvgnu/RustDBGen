@@ -1,0 +1,42 @@
+[models.Budget]
+includes = ["audit_fields", "money_fields"]
+owned_by = "User"
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.name = { type = "String", db_type = "VARCHAR(100)", nullable = false, tags = ["display_name", "searchable"] }
+fields.amount = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false }
+fields.currency = { type = "String", db_type = "VARCHAR(3)", default = "'USD'" }
+fields.period = { type = "BudgetPeriod", db_type = "budget_period", nullable = false }
+fields.start_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = false }
+fields.end_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = true }
+fields.description = { type = "String", db_type = "TEXT", nullable = true }
+fields.is_active = { type = "Boolean", db_type = "BOOLEAN", default = "true" }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = false }
+fields.category_id = { type = "Uuid", db_type = "UUID", nullable = true }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+relations.category = { on = "category_id", references = { model = "Category", field = "id" } }
+indexes.budget_user_idx = { fields = ["user_id"] }
+indexes.budget_category_idx = { fields = ["category_id"] }
+indexes.budget_period_idx = { fields = ["period"] }
+indexes.budget_date_range_idx = { fields = ["start_date", "end_date"] }
+unique_constraints.budget_name_user_unique = { fields = ["name", "user_id"] }
+check_constraints.budget_amount_positive = { expression = "amount > 0" }
+check_constraints.budget_name_length = { expression = "char_length(name) > 0" }
+check_constraints.budget_date_range = { expression = "end_date IS NULL OR end_date > start_date" }
+
+[models.Budget.options]
+soft_delete = true
+
+[models.Budget.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.Budget]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/budgets"
+auth_required = true
+
+[routes.Budget.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 

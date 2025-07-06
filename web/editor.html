@@ -1,0 +1,30 @@
+<!--
+ purpose: Simple schema editor served by `rustdbgen serve`
+ inputs: GET /schema, POST /schema
+ outputs: Web form for editing schema
+ status: prototype
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>RustDBGen Editor</title>
+<script>
+async function loadSchema() {
+  const resp = await fetch('/schema');
+  document.getElementById('schema').value = await resp.text();
+}
+async function saveSchema() {
+  const body = document.getElementById('schema').value;
+  await fetch('/schema', {method: 'POST', body});
+  alert('Saved');
+}
+window.onload = loadSchema;
+</script>
+</head>
+<body>
+<h1>RustDBGen Schema Editor</h1>
+<textarea id="schema" rows="30" cols="80"></textarea><br/>
+<button onclick="saveSchema()">Save</button>
+</body>
+</html>

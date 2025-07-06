@@ -1,0 +1,56 @@
+[models.RecurringTransaction]
+includes = ["audit_fields", "money_fields"]
+owned_by = "User"
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.name = { type = "String", db_type = "VARCHAR(100)", nullable = false, tags = ["display_name", "searchable"] }
+fields.description = { type = "String", db_type = "TEXT", nullable = false }
+fields.amount = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false }
+fields.currency = { type = "String", db_type = "VARCHAR(3)", default = "'USD'" }
+fields.type = { type = "TransactionType", db_type = "transaction_type", nullable = false }
+fields.frequency = { type = "RecurringFrequency", db_type = "recurring_frequency", nullable = false }
+fields.start_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = false }
+fields.end_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = true }
+fields.next_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = false }
+fields.is_active = { type = "Boolean", db_type = "BOOLEAN", default = "true" }
+fields.notes = { type = "String", db_type = "TEXT", nullable = true }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = false }
+fields.account_id = { type = "Uuid", db_type = "UUID", nullable = false }
+fields.category_id = { type = "Uuid", db_type = "UUID", nullable = true }
+fields.from_account_id = { type = "Uuid", db_type = "UUID", nullable = true }
+fields.to_account_id = { type = "Uuid", db_type = "UUID", nullable = true }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+relations.account = { on = "account_id", references = { model = "Account", field = "id" } }
+relations.category = { on = "category_id", references = { model = "Category", field = "id" } }
+relations.from_account = { on = "from_account_id", references = { model = "Account", field = "id" } }
+relations.to_account = { on = "to_account_id", references = { model = "Account", field = "id" } }
+indexes.recurring_transaction_user_idx = { fields = ["user_id"] }
+indexes.recurring_transaction_account_idx = { fields = ["account_id"] }
+indexes.recurring_transaction_category_idx = { fields = ["category_id"] }
+indexes.recurring_transaction_next_date_idx = { fields = ["next_date"] }
+indexes.recurring_transaction_frequency_idx = { fields = ["frequency"] }
+unique_constraints.recurring_transaction_name_user_unique = { fields = ["name", "user_id"] }
+check_constraints.recurring_transaction_amount_positive = { expression = "amount > 0" }
+check_constraints.recurring_transaction_description_length = { expression = "char_length(description) > 0" }
+check_constraints.recurring_transaction_name_length = { expression = "char_length(name) > 0" }
+check_constraints.recurring_transaction_date_range = { expression = "end_date IS NULL OR end_date > start_date" }
+check_constraints.recurring_transaction_next_date_valid = { expression = "next_date >= start_date" }
+check_constraints.transfer_accounts_different = { expression = "(type != 'Transfer') OR (from_account_id != to_account_id)" }
+check_constraints.transfer_accounts_required = { expression = "(type != 'Transfer') OR (from_account_id IS NOT NULL AND to_account_id IS NOT NULL)" }
+
+[models.RecurringTransaction.options]
+soft_delete = true
+
+[models.RecurringTransaction.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.RecurringTransaction]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/recurring-transactions"
+auth_required = true
+
+[routes.RecurringTransaction.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 

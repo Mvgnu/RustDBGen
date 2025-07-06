@@ -1,0 +1,49 @@
+[models.Transaction]
+includes = ["audit_fields", "money_fields"]
+owned_by = "User"
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.description = { type = "String", db_type = "TEXT", nullable = false, tags = ["display_name", "searchable"] }
+fields.type = { type = "TransactionType", db_type = "transaction_type", nullable = false }
+fields.status = { type = "TransactionStatus", db_type = "transaction_status", default = "'Completed'" }
+fields.amount = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false }
+fields.currency = { type = "String", db_type = "VARCHAR(3)", default = "'USD'" }
+fields.date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = false, default = "now()" }
+fields.notes = { type = "String", db_type = "TEXT", nullable = true }
+fields.receipt = { type = "File", storage = { backend = "s3", allowed_types = ["image/png", "image/jpeg", "application/pdf"], path = "uploads/transactions/{id}/" } }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = false }
+fields.account_id = { type = "Uuid", db_type = "UUID", nullable = false }
+fields.category_id = { type = "Uuid", db_type = "UUID", nullable = true }
+fields.from_account_id = { type = "Uuid", db_type = "UUID", nullable = true }
+fields.to_account_id = { type = "Uuid", db_type = "UUID", nullable = true }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+relations.account = { on = "account_id", references = { model = "Account", field = "id" } }
+relations.category = { on = "category_id", references = { model = "Category", field = "id" } }
+relations.from_account = { on = "from_account_id", references = { model = "Account", field = "id" } }
+relations.to_account = { on = "to_account_id", references = { model = "Account", field = "id" } }
+indexes.transaction_user_idx = { fields = ["user_id"] }
+indexes.transaction_account_idx = { fields = ["account_id"] }
+indexes.transaction_category_idx = { fields = ["category_id"] }
+indexes.transaction_date_idx = { fields = ["date"] }
+indexes.transaction_type_idx = { fields = ["type"] }
+check_constraints.transaction_amount_positive = { expression = "amount > 0" }
+check_constraints.transaction_description_length = { expression = "char_length(description) > 0" }
+check_constraints.transfer_accounts_different = { expression = "(type != 'Transfer') OR (from_account_id != to_account_id)" }
+check_constraints.transfer_accounts_required = { expression = "(type != 'Transfer') OR (from_account_id IS NOT NULL AND to_account_id IS NOT NULL)" }
+
+[models.Transaction.options]
+soft_delete = true
+
+[models.Transaction.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.Transaction]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/transactions"
+auth_required = true
+
+[routes.Transaction.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 

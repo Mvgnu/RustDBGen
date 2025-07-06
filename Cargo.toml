@@ -1,0 +1,27 @@
+[package]
+name = "rustdbgen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio", "macros", "postgres", "mysql", "sqlite", "any"] }
+clap = { version = "4.5", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde", "clock"] }
+serde_json = "1.0"
+which = "5"
+tracing = "0.1"
+regex = "1"
+jsonwebtoken = "9"
+thiserror = "1"
+sha2 = "0.10"
+axum = { version = "0.7", features = ["json"] }
+tracing-subscriber = "0.3"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+[dev-dependencies]
+pg-embed = { version = "0.7", default-features = false, features = ["rt_tokio"] }
+tempfile = "3"

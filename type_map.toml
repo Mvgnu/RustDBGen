@@ -1,0 +1,12 @@
+[Email]
+rust_type = "String"
+db_type = "TEXT"
+
+[File]
+rust_type = "String"
+db_type = "TEXT"
+[db_types]
+integer = "i32"
+uuid = "uuid::Uuid"
+text = "String"
+"timestamp with time zone" = "chrono::DateTime<chrono::Utc>"

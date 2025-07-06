@@ -1,0 +1,42 @@
+[models.Goal]
+includes = ["audit_fields", "money_fields"]
+owned_by = "User"
+fields.id = { type = "Uuid", db_type = "UUID PRIMARY KEY", default = "gen_random_uuid()" }
+fields.name = { type = "String", db_type = "VARCHAR(100)", nullable = false, tags = ["display_name", "searchable"] }
+fields.target_amount = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false }
+fields.current_amount = { type = "Decimal", db_type = "DECIMAL(15,2)", nullable = false, default = "0.00" }
+fields.currency = { type = "String", db_type = "VARCHAR(3)", default = "'USD'" }
+fields.status = { type = "GoalStatus", db_type = "goal_status", default = "'Active'" }
+fields.target_date = { type = "DateTime<Utc>", db_type = "TIMESTAMPTZ", nullable = true }
+fields.description = { type = "String", db_type = "TEXT", nullable = true }
+fields.color = { type = "String", db_type = "VARCHAR(7)", nullable = true, default = "'#4CAF50'" }
+fields.icon = { type = "String", db_type = "VARCHAR(50)", nullable = true }
+fields.user_id = { type = "Uuid", db_type = "UUID", nullable = false }
+relations.user = { on = "user_id", references = { model = "User", field = "id" } }
+indexes.goal_user_idx = { fields = ["user_id"] }
+indexes.goal_status_idx = { fields = ["status"] }
+indexes.goal_target_date_idx = { fields = ["target_date"] }
+unique_constraints.goal_name_user_unique = { fields = ["name", "user_id"] }
+check_constraints.goal_target_amount_positive = { expression = "target_amount > 0" }
+check_constraints.goal_current_amount_positive = { expression = "current_amount >= 0" }
+check_constraints.goal_current_not_exceed_target = { expression = "current_amount <= target_amount" }
+check_constraints.goal_name_length = { expression = "char_length(name) > 0" }
+check_constraints.goal_color_format = { expression = "color ~ '^#[0-9A-Fa-f]{6}$' OR color IS NULL" }
+
+[models.Goal.options]
+soft_delete = true
+
+[models.Goal.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"]
+
+[routes.Goal]
+methods = ["GET", "POST", "PUT", "DELETE"]
+path = "/api/goals"
+auth_required = true
+
+[routes.Goal.permissions]
+read = ["admin", "member"]
+update = ["admin", "member"]
+delete = ["admin", "member"] 
