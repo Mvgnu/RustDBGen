@@ -1,8 +1,12 @@
-# RustDBGen
+RustGen
 
 An experimental schema-driven code generator for Rust backends. Generate complete, production-ready APIs from TOML schema definitions with zero boilerplate. 
 
 Current Status: Experimental, expect things to break, updates coming soon!
+
+![ChatGPT Image 6  Juli 2025, 19_16_15](https://github.com/user-attachments/assets/0c46a500-cf4a-4f2b-9c6b-fa76abeb48ac)
+
+
 
 ## 🚀 Features
 
