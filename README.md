@@ -2,7 +2,7 @@
 
 An experimental schema-driven code generator for Rust backends. Generate complete, production-ready APIs from TOML schema definitions with zero boilerplate. 
 
-Current Status: Prototype.
+Current Status: Experimental, expect things to break, updates coming soon!
 
 ## 🚀 Features
 
